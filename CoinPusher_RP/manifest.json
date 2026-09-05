@@ -1,0 +1,16 @@
+{
+  "format_version": 2,
+  "header": {
+    "name": "Coin Pusher RP",
+    "description": "Minimal Coin Pusher resource pack",
+    "uuid": "5b0e2f13-6d3c-4a8b-9f21-7c4e5d6a8b90",
+    "version": [1, 0, 0]
+  },
+  "modules": [
+    {
+      "type": "resources",
+      "uuid": "8f1a2b3c-4d5e-6789-abcd-ef0123456789",
+      "version": [1, 0, 0]
+    }
+  ]
+}
