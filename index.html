@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Coin Pusher — Download</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+body{margin:0;min-height:100vh;display:grid;place-items:center;background:#111;color:#fff;font:16px Arial,sans-serif}.box{width:min(420px,calc(100% - 40px));padding:32px;border-radius:20px;background:#1e1e1e;text-align:center;box-shadow:0 15px 50px #000}button{width:100%;padding:15px;margin:8px 0;border:0;border-radius:12px;font-size:16px;font-weight:700;cursor:pointer}.bp{background:#32d74b;color:#fff}.rp{background:#1683ff;color:#fff}.all{background:#ffb000;color:#111}button:hover{filter:brightness(1.1)}#status{min-height:22px;color:#aaa;margin-top:12px}</style>
+</head>
+<body>
+<div class="box">
+<h1>🪙 Coin Pusher</h1>
+<p>Скачать Minecraft Bedrock Add-On</p>
+<button class="all" onclick="downloadAll()">📦 Скачать всё (.mcaddon)</button>
+<button class="bp" onclick="downloadPack(BP,'CoinPusher_BP.mcpack')">🟩 Behavior Pack</button>
+<button class="rp" onclick="downloadPack(RP,'CoinPusher_RP.mcpack')">🟦 Resource Pack</button>
+<div id="status"></div>
+</div>
+<script>
+const BP={
+'manifest.json':`{
+  "format_version":2,
+  "header":{"name":"Coin Pusher BP","description":"2x2 visible coin pusher machine","uuid":"7d2b0d7c-0db6-4f5a-9e55-4b2f8c5d9f01","version":[1,0,1]},
+  "modules":[
+    {"type":"data","uuid":"1c5d7f0b-6c8e-4d91-9e52-8b7a1a2c3d44","version":[1,0,1]},
+    {"type":"script","language":"javascript","uuid":"9a2e7f31-1c64-4f55-a8b2-6d93e0c7f112","version":[1,0,1],"entry":"scripts/main.js"}
+  ],
+  "dependencies":[{"module_name":"@minecraft/server","version":"1.13.0"}]
+}`,
+'items/token.json':`{
+  "format_version":"1.20.0",
+  "minecraft:item":{"description":{"identifier":"coinpusher:token","menu_category":{"category":"items"}},"components":{"minecraft:max_stack_size":64,"minecraft:icon":{"texture":"gold_ingot"},"minecraft:display_name":{"value":"Жетон"}}}
+}`,
+'functions/give_token.mcfunction':'give @s coinpusher:token 16',
+'scripts/main.js':`import { world, system } from "@minecraft/server";
+const MACHINES=new Map();
+function keyOf(d,l){return d.id+":"+l.x+","+l.y+","+l.z;}
+world.afterEvents.itemUse.subscribe(e=>{
+ const p=e.source,i=e.itemStack;if(!i||i.typeId!=="coinpusher:token")return;
+ for(const [k,m] of MACHINES){if(m.dimension.id!==p.dimension.id)continue;const dx=m.x-p.location.x,dy=m.y-p.location.y,dz=m.z-p.location.z;if(Math.abs(dx)<=3&&Math.abs(dy)<=3&&Math.abs(dz)<=3){try{p.runCommand("clear @s coinpusher:token 0 1");p.runCommand("playsound random.click @s");startMachine(m);}catch(err){console.warn(err);}break;}}
+});
+world.afterEvents.playerPlaceBlock.subscribe(e=>{const b=e.block;if(b.typeId!=="minecraft:gold_block")return;const a=b.dimension.getBlock({x:b.location.x,y:b.location.y+1,z:b.location.z});if(!a||a.typeId!=="minecraft:gold_block")return;MACHINES.set(keyOf(b.dimension,b.location),{dimension:b.dimension,x:b.location.x,y:b.location.y,z:b.location.z,running:false});});
+world.afterEvents.playerBreakBlock.subscribe(e=>{for(const [k,m] of MACHINES)if(m.dimension.id===e.block.dimension.id&&m.x===e.block.location.x&&m.y===e.block.location.y&&m.z===e.block.location.z)MACHINES.delete(k);});
+function startMachine(m){if(m.running)return;m.running=true;system.runTimeout(()=>{try{m.dimension.spawnParticle("minecraft:basic_flame_particle",{x:m.x+.5,y:m.y+1.2,z:m.z+.5});m.dimension.runCommand("playsound random.click @a");}catch(e){console.warn(e);}m.running=false;},20);}
+`
+};
+const RP={'manifest.json':`{
+  "format_version":2,
+  "header":{"name":"Coin Pusher RP","description":"Minimal Coin Pusher resource pack","uuid":"5b0e2f13-6d3c-4a8b-9f21-7c4e5d6a8b90","version":[1,0,0]},
+  "modules":[{"type":"resources","uuid":"8f1a2b3c-4d5e-6789-abcd-ef0123456789","version":[1,0,0]}]
+}`};
+function status(x){document.getElementById('status').textContent=x;}
+async function zip(files){const z=new JSZip();for(const [p,c] of Object.entries(files))z.file(p,c);return z.generateAsync({type:'blob'});}
+async function save(files,name){status('Создаю '+name+'…');const blob=await zip(files),u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(u),1000);status('Готово ✅');}
+function downloadPack(files,name){save(files,name);}
+async function downloadAll(){const z=new JSZip();for(const [p,c] of Object.entries(BP))z.file('CoinPusher_BP/'+p,c);for(const [p,c] of Object.entries(RP))z.file('CoinPusher_RP/'+p,c);status('Создаю CoinPusher.mcaddon…');const blob=await z.generateAsync({type:'blob'}),u=URL.createObjectURL(blob),a=document.createElement('a');a.href=u;a.download='CoinPusher.mcaddon';a.click();setTimeout(()=>URL.revokeObjectURL(u),1000);status('Готово ✅');}
+</script>
+</body>
+</html>
