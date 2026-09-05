@@ -1,0 +1,1 @@
+# Coin Pusher Bedrock\n\nPrototype 2x2 machine shell. The intended finished design is two blocks wide and two blocks high, with a transparent front, visible token tray and a visibly moving pusher.\n
