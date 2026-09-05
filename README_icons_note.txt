@@ -1,0 +1,1 @@
+pack icons are managed via Git data
