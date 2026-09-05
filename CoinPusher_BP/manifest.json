@@ -2,15 +2,28 @@
   "format_version": 2,
   "header": {
     "name": "Coin Pusher BP",
-    "description": "Minimal Coin Pusher add-on",
+    "description": "2x2 visible coin pusher machine",
     "uuid": "7d2b0d7c-0db6-4f5a-9e55-4b2f8c5d9f01",
-    "version": [1, 0, 0]
+    "version": [1, 0, 1]
   },
   "modules": [
     {
       "type": "data",
       "uuid": "1c5d7f0b-6c8e-4d91-9e52-8b7a1a2c3d44",
-      "version": [1, 0, 0]
+      "version": [1, 0, 1]
+    },
+    {
+      "type": "script",
+      "language": "javascript",
+      "uuid": "9a2e7f31-1c64-4f55-a8b2-6d93e0c7f112",
+      "version": [1, 0, 1],
+      "entry": "scripts/main.js"
+    }
+  ],
+  "dependencies": [
+    {
+      "module_name": "@minecraft/server",
+      "version": "1.13.0"
     }
   ]
 }
